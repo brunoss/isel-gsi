@@ -29,4 +29,3 @@ begin
     insert into t1 values(@i*2,CAST(@i*2 as CHAR(1000)))
     set @i = @i+1
 end
-
