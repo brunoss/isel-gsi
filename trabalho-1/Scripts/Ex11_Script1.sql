@@ -7,7 +7,6 @@ create table tc (i int primary key,
                  j char(5000),
 				 k varchar(8000)
                  )
-
     
 set nocount on           
 declare @i int
