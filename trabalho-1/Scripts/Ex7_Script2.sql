@@ -54,7 +54,7 @@ Os resultados aparecem por ordem não sequencial, mas sempre pela mesma ordem.
   -- ponto 6 (executar apenas)
 
  
-   select I, COUNT(*) from tpart1 group by I OPTION(MAXDOP 2)
+   select I, COUNT(*) from tpart1 group by I OPTION(MAXDOP 1)
 -- ponto 7
  --(observe o resultado da instrução anterior na janela Messages)
  -- veja também o plano de execução
