@@ -2,7 +2,7 @@ use GSI_AP2
 
 
 select @@spid -- anotar valor
-
+--53
 
 -- ponto 1
 

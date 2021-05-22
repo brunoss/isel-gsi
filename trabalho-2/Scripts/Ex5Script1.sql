@@ -5,6 +5,11 @@ if object_id('verLocks1') is not null
 
 GO
 
+if not exists (select * from sys.table_types where name = 'tTAb')
+   create type tTab as table (
+      spid int, dbid int, obid int, IndId int, type nchar(4), resource nchar(32), mode nvarchar(8),
+       status nvarchar(5));
+
 create proc verLocks1 @s2 int, @tipo char(3)
 as
 begin

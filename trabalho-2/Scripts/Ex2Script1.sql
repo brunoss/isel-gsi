@@ -26,6 +26,3 @@ select spid, object_name(obid) as obname, resource,type, mode, status from  @t
                          where object_name(obid) is not null 
 						 and	type in ('KEY ', 'PAG', 'TAB', 'RID','DB')
 end
-
-
-
