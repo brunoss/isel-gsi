@@ -7,17 +7,35 @@ dbcc show_statistics ('Sales.SalesOrderDetail',IX_SalesOrderDetail_ProductID)
 dbcc freeproccache
 
 set statistics io on
+/*
+790	0	377	0	1
+852	0	422	0	1
+*/
+
+
 --ponto 2
 -- observe qual o plano de execução produzido para a instrução seguinte
 -- execute a instrução e anote o número de logical reads
 select * from Sales.SalesOrderDetail where ProductID = 852 
 dbcc freeproccache
+/*
+(422 rows affected)
+Table 'SalesOrderDetail'. Scan count 1, logical reads 1248, physical reads 3, page server reads 0, read-ahead reads 1244, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+DBCC execution completed. If DBCC printed error messages, contact your system administrator.
+*/
 
 --ponto 3
 -- observe qual o plano de execução produzido para a instrução seguinte
 -- explique a razão porque o plano é diferente do do ponto anterior
 -- execute a instrução e anote o número de logical reads
 select * from Sales.SalesOrderDetail where ProductID = 790
+/*
+(377 rows affected)
+Table 'SalesOrderDetail'. Scan count 1, logical reads 1166, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+
+Os planos são diferentes porque o produto 852 tem 422 linhas associadas e o SGBD preferiu fazer um Index Scan, lendo todos os dados da tabela.
+O produto 790 tem 377 linhas e o SGBD decidiu tirar partido do indice e fazer o Key Lookup.
+*/
 --checkpoint 1
 dbcc freeproccache
 
@@ -274,7 +292,11 @@ option(use plan N'<?xml version="1.0" encoding="utf-16"?>
   </BatchSequence>
 </ShowPlanXML>')
 
-
+select * from Sales.SalesOrderDetail where ProductID = 852 
+/*
+Foi utilizada uma query hint com o mesmo plano da query com where ProductID = 790 e o SGBD executou o plano indicado.
+O SGBD estima um custo um bocado maior em relação à query sem o uso de indice.
+*/
 
 -- ponto 5
 
@@ -289,7 +311,7 @@ GO
 
 
 
-ALTER DATABASE AdventureWorks2019 SET PARAMETERIZATION FORCED
+ALTER DATABASE AdventureWorks2019 SET PARAMETERIZATION SIMPLE
 
 /* se for necessário, fazer:
 use  master
@@ -302,12 +324,17 @@ dbcc freeproccache
 -- ponto 6
 -- executar e verificar plano para a seguinte e instrução e executá-la
 select * from Sales.SalesOrderDetail where ProductID = 852
-
+/*
+Como o plano de execução está a usar um valor parametrizado por obrigação (PARAMETERIZATION FORCED), 
+então o SGBD estima que na maior parte dos casos é melhor fazer um index scan e não utilizar o índice.
+*/
 
 -- ponto 7
 -- executar e verificar plano e número de logical reads para a seguinte e instrução e compará-los com os obtidos no ponto 3
 select * from Sales.SalesOrderDetail where ProductID = 790
-
+/*
+O plano utilizado é o plano com o primeiro valor
+*/
 
 -- esta query permite verificar quais são os planos existentes na cache
 SELECT c.usecounts
@@ -321,3 +348,7 @@ WHERE t.text LIKE 'select * from Sales.SalesOrderDetail where ProductID%' or t.t
 
 
 set statistics io off
+/*
+Com SET PARAMETERIZATION FORCED é criado uma plano de execução parametrizado.
+Com SET PARAMETERIZATION SIMPLE esse plano não tem que ser criado.
+*/
