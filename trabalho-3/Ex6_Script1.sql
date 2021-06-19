@@ -21,7 +21,10 @@ end
 --compare e tente explicar o que leva o Sql Server a produzir esses planos
 select * from t where i = 20
 select * from t1 where i = 20
-
+/*
+A tabela t tem um indice clustered e não precisa de obter as restantes colunas.
+Já a tabela t1 tem um indice non clustered e precisa de fazer um RID lookup.
+*/
 
 -- ponto 3
 -- idem para as seguintes instruções
@@ -29,7 +32,10 @@ select * from t1 where i = 20
 -- do ponto anterior para este
 select * from t where i < 50
 select * from t1 where i < 50
-
+/*
+A tabela t tem um indice clustered e por isso é feito um Index seek
+A tabela t1 tem um indice non clustered e por isso é feito um table scan.
+*/
 
 -- ponto 4
 drop table t
